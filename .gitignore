@@ -4,3 +4,4 @@ point_clouds/*
 ./__pycache__/*
 .DS_Store
 *.pyc
+*.ipynb
