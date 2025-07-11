@@ -13,7 +13,6 @@ from process_stl import mesh_to_point_cloud, save_ply
 from tweaks import add_jitter, mirror_mesh_x, rotate_mesh
 import pandas as pd
 
-
 mesh_path = "/Users/marina/.cache/huggingface/hub/datasets--maksimko123--fusion360_test_mesh/snapshots/af9643d11bdae5512020bfba024cb4d609b893e1"
 deepcad_gen_path = "/Users/marina/projects/AIRI/data/gen_deepcad"
 deepcad_gt_path = "/Users/marina/projects/AIRI/data/gt_deepcad"

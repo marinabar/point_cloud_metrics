@@ -34,15 +34,14 @@ def plot_aoc(angles, cdf, title='aoc Plot', aoc_value=None):
     plt.ylim(0, 1)
     plt.show()
 
-def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, visualize=False, visualize_aoc=False):
+def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, n_points=8192, visualize=False, visualize_aoc=False):
     """
     Input : normalized meshes
     computes the cosine similarity between the normals of the predicted mesh and the ground truth mesh.
     -> Done on a subset of points from the mesh point clouds
     Computes the area over the curve (AOC) of the angle distribution between the normals.
-    Returns the aoc and median cosine similarity.
+    Returns the aoc and mean_cos_sim
     """
-    n_points = 8192
     #tol = 0.01 * max(gt_mesh.extents.max(), pred_mesh.extents.max())  # 1% of the mesh extent
     tol = pred_mesh.extents.max() * tol  / 100
     print(f"tolerence: {tol:.4f}")
@@ -94,7 +93,7 @@ def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, visualize=False, visualiz
     # compute cosine similarity
     cos_sim = (valid_pred_normals * valid_gt_normals).sum(axis=1)
     cos_sim = np.clip(cos_sim, -1.0, 1.0)
-    median_cos_sim = np.median(cos_sim)
+    mean_cos_sim = np.mean(cos_sim)
     
     # distribution of angles between normals
     angles = np.arccos(cos_sim)
@@ -124,7 +123,7 @@ def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, visualize=False, visualiz
         visualize_normals(valid_pred_normals, valid_gt_normals, valid_pred_points, valid_gt_points)
 
 
-    return aoc_normalized, median_cos_sim, per_invalid
+    return aoc_normalized, mean_cos_sim, per_invalid
 
 def visualize_normals(pred_normals, gt_normals, pred_points, gt_points):
 
