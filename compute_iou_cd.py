@@ -20,44 +20,42 @@ deepcad_gt_path = "/Users/marina/projects/AIRI/data/gt_deepcad"
 gt_files = [f for f in os.listdir(deepcad_gt_path) if f.endswith('.stl')]
 
 results = []
-tol = 10 # 2 %
 for f in gt_files:
-    # compute metrics predicted vs ground truth, and compare with noisy vs ground truth
+    # compute metrics predicted vs ground truth
     f_gen = f.replace('.stl', '+0.stl')
     gen_mesh = trimesh.load(os.path.join(deepcad_gen_path, f_gen))
     gt_mesh = trimesh.load(os.path.join(deepcad_gt_path, f))
     gen_mesh = transform_gt_mesh(gen_mesh)
     gt_mesh = transform_gt_mesh(gt_mesh)
-
-    """
-    modified_mesh = add_jitter(gen_mesh, jitter=0.005)
-    print("computing normals metrics for noisy mesh")
-    auc_noisy, median_cos_sim_noisy = compute_normals_metrics(modified_mesh, gt_mesh)
-    print("computing normals metrics for generated mesh")"""
-    auc_gen, median_cos_sim_gen, per_inval = compute_normals_metrics(gen_mesh, gt_mesh, tol = tol)
+    try:
+        iou = compute_iou(gen_mesh, gt_mesh)
+    except Exception as e:
+        print(f"Error computing IoU for {f}: {e}")
+        iou = np.nan
+    cd = compute_cd(gen_mesh, gt_mesh)
 
     results.append({
         'filename': f,
-        'aoc_generated': auc_gen,
-        'median_cos_sim_generated': median_cos_sim_gen,
-        'percentage_samples_with_no_neigh': per_inval
+        'iou': iou,
+        'cd': cd
     })
-    #print(f"Processed: {f}")
+    print(f"Processed: {f}")
 
-mean_aoc = np.mean([res['aoc_generated'] for res in results])
-mean_cos_sim = np.mean([res['median_cos_sim_generated'] for res in results])
-mean_per_inval = np.mean([res['percentage_samples_with_no_neigh'] for res in results])
+mean_iou = np.nanmean([res['iou'] for res in results])
+mean_cd = np.mean([res['cd'] for res in results])
+nb_nan_iou = np.sum(np.isnan([res['iou'] for res in results]))
 
-print(f"Mean AOC: {mean_aoc:.4f}, Mean Median Cosine Similarity: {mean_cos_sim:.4f}, Mean Percentage Invalid Neighbors: {mean_per_inval:.2f}%")
+print(f"Mean IoU: {mean_iou:.4f}, Mean CD: {mean_cd:.4f}, nan IoU count: {nb_nan_iou}")
+print()
 
 results_df = pd.DataFrame(results)
 
 mean_row = pd.DataFrame([{
     'filename': 'mean',
-    'aoc_generated': mean_aoc,
-    'median_cos_sim_generated': mean_cos_sim,
-    'percentage_samples_with_no_neigh': mean_per_inval
+    'iou': mean_iou,
+    'cd': mean_cd
+    #'emd': np.mean([res['emd'] for res in results])
 }])
 results_df = pd.concat([results_df, mean_row], ignore_index=True)
-results_df.to_csv(f'nc_results_tol_{tol}_percent.csv', index=False)
-print("Results saved to .csv")
+results_df.to_csv('emd_results.csv', index=False)
+print("Results saved to emd_results.csv")
