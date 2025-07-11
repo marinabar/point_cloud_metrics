@@ -12,6 +12,7 @@ from utils import compute_normals_metrics
 from process_stl import mesh_to_point_cloud, save_ply
 from tweaks import add_jitter, mirror_mesh_x, rotate_mesh
 import pandas as pd
+from tqdm import tqdm
 
 
 mesh_path = "/Users/marina/.cache/huggingface/hub/datasets--maksimko123--fusion360_test_mesh/snapshots/af9643d11bdae5512020bfba024cb4d609b893e1"
@@ -21,7 +22,7 @@ gt_files = [f for f in os.listdir(deepcad_gt_path) if f.endswith('.stl')]
 
 results = []
 tol = 10 # 2 %
-for f in gt_files:
+for f in tqdm(gt_files):
     # compute metrics predicted vs ground truth, and compare with noisy vs ground truth
     f_gen = f.replace('.stl', '+0.stl')
     gen_mesh = trimesh.load(os.path.join(deepcad_gen_path, f_gen))

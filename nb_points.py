@@ -1,7 +1,8 @@
 import os
-import numpy as np
 import trimesh
 import sys
+from tqdm import tqdm
+import random
 
 project_root = os.path.abspath(os.path.join(os.path.dirname(__file__), '..', '..'))
 if project_root not in sys.path:
@@ -15,15 +16,18 @@ import pandas as pd
 deepcad_gen_path = "/Users/marina/projects/AIRI/data/gen_deepcad"
 deepcad_gt_path = "/Users/marina/projects/AIRI/data/gt_deepcad"
 gt_files = [f for f in os.listdir(deepcad_gt_path) if f.endswith('.stl')]
+s = 100
 
-metrics = ['AOC', 'Mean Cosine Similarity', 'CD (x1000)']
+gt_files = random.sample(gt_files, s)
+
+metrics = ['AOC', 'Mean Cosine Similarity']
 
 nb_points = [2**i for i in range(10,16)]
 
 tol = int(input("enter tolerance (in %): "))
 results = []
 
-for file in gt_files:
+for file in tqdm(gt_files):
     file_gen = file.replace('.stl', '+0.stl')
     gen_mesh = trimesh.load(os.path.join(deepcad_gen_path, file_gen))
     gt_mesh = trimesh.load(os.path.join(deepcad_gt_path, file))
@@ -33,14 +37,11 @@ for file in gt_files:
     for point in nb_points:
 
         auc_gen, mean_cos_sim, _ = compute_normals_metrics(gen_mesh, gt_mesh, tol=tol, n_points=point)
-
-        cd = compute_cd(gen_mesh, gt_mesh) * 1000
         results.append({
             'filename': file,
             'nb_points': point,
             'AOC': auc_gen,
-            'Mean Cosine Similarity': mean_cos_sim,
-            'CD (x1000)': cd
+            'Mean Cosine Similarity': mean_cos_sim
         })
 
 results_df = pd.DataFrame(results)

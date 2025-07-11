@@ -84,7 +84,7 @@ def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, n_points=8192, visualize=
 
     nb_invalid = n_points - len(valid_pred_normals)
     per_invalid = nb_invalid / n_points * 100
-    print(f"Number of points with no neighbors within tol: {nb_invalid} out of {n_points} ({per_invalid:.2f}%)")
+    #print(f"Number of points with no neighbors within tol: {nb_invalid} out of {n_points} ({per_invalid:.2f}%)")
 
     if nb_invalid == n_points:
         return 1.0, 0.0, 100
@@ -215,8 +215,7 @@ def compute_iou(pred_mesh, gt_mesh):
     return iou
 
 
-def compute_cd(pred_mesh, gt_mesh):
-    n_points = 8192
+def compute_cd(pred_mesh, gt_mesh, n_points=8192):
     gt_points, _ = trimesh.sample.sample_surface(gt_mesh, n_points)
     pred_points, _ = trimesh.sample.sample_surface(pred_mesh, n_points)
     gt_distance, _ = cKDTree(gt_points).query(pred_points, k=1)
