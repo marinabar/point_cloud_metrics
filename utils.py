@@ -44,7 +44,6 @@ def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, n_points=8192, visualize=
     """
     #tol = 0.01 * max(gt_mesh.extents.max(), pred_mesh.extents.max())  # 1% of the mesh extent
     tol = pred_mesh.extents.max() * tol  / 100
-    print(f"tolerence: {tol:.4f}")
 
     gt_points, gt_face_indexes = trimesh.sample.sample_surface(gt_mesh, n_points)
     pred_points, pred_face_indexes = trimesh.sample.sample_surface(pred_mesh, n_points)
@@ -112,8 +111,8 @@ def compute_normals_metrics(pred_mesh, gt_mesh, tol=1, n_points=8192, visualize=
 
     aoc_normalized = 1 - aoc_normalized
     # plot the aoc
-    if aoc_normalized > 0.3:
-        print(f"HIGH aoc: {aoc_normalized:.2f}")
+    #if aoc_normalized > 0.3:
+        #print(f"HIGH aoc: {aoc_normalized:.2f}")
         #plot_aoc(angles, cdf, title='aoc of Normal Angles', aoc_value=aoc_normalized)
 
     if visualize_aoc:

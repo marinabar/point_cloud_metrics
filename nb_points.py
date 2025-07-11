@@ -20,11 +20,8 @@ s = 100
 
 gt_files = random.sample(gt_files, s)
 
-metrics = ['AOC', 'Mean Cosine Similarity']
-
 nb_points = [2**i for i in range(10,16)]
-
-tol = int(input("enter tolerance (in %): "))
+tols = [2, 5, 10]  # in percent
 results = []
 
 for file in tqdm(gt_files):
@@ -33,16 +30,22 @@ for file in tqdm(gt_files):
     gt_mesh = trimesh.load(os.path.join(deepcad_gt_path, file))
     gen_mesh = transform_gt_mesh(gen_mesh)
     gt_mesh = transform_gt_mesh(gt_mesh)
-
+    
+    iou = compute_iou(gen_mesh, gt_mesh)
     for point in nb_points:
+        cd = compute_cd(gen_mesh, gt_mesh, point) * 1000
+        for tol in tols:
+            auc_gen, mean_cos_sim, _ = compute_normals_metrics(gen_mesh, gt_mesh, tol=tol, n_points=point)
 
-        auc_gen, mean_cos_sim, _ = compute_normals_metrics(gen_mesh, gt_mesh, tol=tol, n_points=point)
-        results.append({
-            'filename': file,
-            'nb_points': point,
-            'AOC': auc_gen,
-            'Mean Cosine Similarity': mean_cos_sim
-        })
+            results.append({
+                'filename': file,
+                'nb_points': point,
+                'AOC': auc_gen,
+                'Mean Cosine Similarity': mean_cos_sim,
+                'CD (x1000)': cd,
+                'IoU': iou,
+                'tolerance': tol
+            })
 
 results_df = pd.DataFrame(results)
-results_df.to_csv(f'results_normals_metrics_tol_{tol}.csv', index=False)
+results_df.to_csv(f'metrics_pc.csv', index=False)
